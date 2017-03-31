@@ -26,6 +26,7 @@
         android:layout_marginStart="16dp"
         android:textOff="@string/reverb_off"
         android:textOn="@string/reverb_on"
+        android:onClick="reverbButtonClicked"
         app:layout_constraintBaseline_toBaselineOf="@+id/btn_start_stop"
         app:layout_constraintLeft_toRightOf="@+id/btn_start_stop" />
 </android.support.constraint.ConstraintLayout>

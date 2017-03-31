@@ -102,6 +102,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void reverbButtonClicked(View view) {
+        if (mPlaying){
+            stopPlayback();
+            startPlayback(mBtnReverbEnable.isChecked());
+        }
+    }
+
     private boolean startPlayback(boolean reverbEnable){
         askForRecordAudioPermission();
 
