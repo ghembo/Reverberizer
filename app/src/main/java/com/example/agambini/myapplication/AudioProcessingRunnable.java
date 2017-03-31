@@ -12,11 +12,11 @@ import android.util.Log;
 class AudioProcessingRunnable implements Runnable {
     private static final String TAG  = "AudioProcessingRunnable";
 
-    private int mSampleRate;
-    private int mBufferSize;
+    private final int mAudioRecordBufferSize;
     private int mOutputBufferSize;
+    private int mSampleRate;
 
-    AudioProcessingRunnable(Object audioManager){
+    AudioProcessingRunnable(Object audioManagerObject){
         mSampleRate = 44100;
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -26,19 +26,19 @@ class AudioProcessingRunnable implements Runnable {
         mOutputBufferSize = 0;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1){
-            AudioManager audioManager2 = (AudioManager) audioManager;
-            int rate = Integer.parseInt(audioManager2.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE));
-            mOutputBufferSize = Integer.parseInt(audioManager2.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER));
+            AudioManager audioManager = (AudioManager) audioManagerObject;
+            int rate = Integer.parseInt(audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE));
+            mOutputBufferSize = Integer.parseInt(audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER));
 
             if (rate != 0){
                 mSampleRate = rate;
             }
         }
 
-        mBufferSize = AudioRecord.getMinBufferSize(mSampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+        mAudioRecordBufferSize = AudioRecord.getMinBufferSize(mSampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 
         if (mOutputBufferSize == 0){
-            mOutputBufferSize = mBufferSize;
+            mOutputBufferSize = mAudioRecordBufferSize;
         }
     }
 
@@ -51,15 +51,23 @@ class AudioProcessingRunnable implements Runnable {
 
         try
         {
-            recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, mSampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, mBufferSize);
+            recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, mSampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, mAudioRecordBufferSize);
 
             if (recorder.getState() != AudioRecord.STATE_INITIALIZED){
-                // invalid
+                Log.e(TAG, "Cannot initialize AudioRecord");
+
+                return;
             }
 
-            mBufferSize = AudioTrack.getMinBufferSize(mSampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
+            int audioTrackBufferSize = AudioTrack.getMinBufferSize(mSampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
 
-            track = new AudioTrack(AudioManager.STREAM_MUSIC, mSampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, mBufferSize, AudioTrack.MODE_STREAM);
+            track = new AudioTrack(AudioManager.STREAM_MUSIC, mSampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, audioTrackBufferSize, AudioTrack.MODE_STREAM);
+
+            if (track.getState() != AudioTrack.STATE_INITIALIZED){
+                Log.e(TAG, "Cannot initialize AudioTrack");
+
+                return;
+            }
 
             PresetReverb reverb = new PresetReverb(1, track.getAudioSessionId());
             reverb.setPreset(PresetReverb.PRESET_LARGEHALL);
@@ -75,8 +83,8 @@ class AudioProcessingRunnable implements Runnable {
 
             while(!Thread.interrupted())
             {
-                mBufferSize = recorder.read(buffer, 0, buffer.length);
-                track.write(buffer, 0, mBufferSize);
+                int bufferSize = recorder.read(buffer, 0, buffer.length);
+                track.write(buffer, 0, bufferSize);
             }
         }
         catch(Throwable ex)
@@ -86,12 +94,10 @@ class AudioProcessingRunnable implements Runnable {
         finally
         {
             if (recorder != null){
-                recorder.stop();
                 recorder.release();
             }
 
             if (track != null){
-                track.stop();
                 track.release();
             }
         }
