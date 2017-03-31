@@ -15,8 +15,11 @@ class AudioProcessingRunnable implements Runnable {
     private final int mAudioRecordBufferSize;
     private int mOutputBufferSize;
     private int mSampleRate;
+    private boolean mReverbEnable;
 
-    AudioProcessingRunnable(Object audioManagerObject){
+    AudioProcessingRunnable(Object audioManagerObject, boolean reverbEnable){
+        mReverbEnable = reverbEnable;
+
         mSampleRate = 44100;
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -69,12 +72,14 @@ class AudioProcessingRunnable implements Runnable {
                 return;
             }
 
-            PresetReverb reverb = new PresetReverb(1, track.getAudioSessionId());
-            reverb.setPreset(PresetReverb.PRESET_LARGEHALL);
-            reverb.setEnabled(true);
+            if (mReverbEnable){
+                PresetReverb reverb = new PresetReverb(1, track.getAudioSessionId());
+                reverb.setPreset(PresetReverb.PRESET_LARGEHALL);
+                reverb.setEnabled(true);
 
-            track.attachAuxEffect(reverb.getId());
-            track.setAuxEffectSendLevel(1.0f);
+                track.attachAuxEffect(reverb.getId());
+                track.setAuxEffectSendLevel(1.0f);
+            }
 
             short[] buffer = new short[mOutputBufferSize / 2];
 

@@ -4,4 +4,6 @@
     <string name="button_stop">Stop</string>
     <string name="permission_denied">Permission denied</string>
     <string name="permission_denied_error">requires audio recording. Allow audio recording permission in order to be able to use it.</string>
+    <string name="reverb_off">Reverb</string>
+    <string name="reverb_on">Reverb</string>
 </resources>

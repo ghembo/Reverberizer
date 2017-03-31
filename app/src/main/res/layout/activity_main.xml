@@ -7,7 +7,7 @@
     tools:context="com.example.agambini.myapplication.MainActivity">
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/btn_start_stop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="playButtonClicked"
@@ -17,4 +17,15 @@
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
         app:layout_constraintLeft_toLeftOf="parent" />
+
+    <ToggleButton
+        android:id="@+id/btn_reverb_on_off"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:textOff="@string/reverb_off"
+        android:textOn="@string/reverb_on"
+        app:layout_constraintBaseline_toBaselineOf="@+id/btn_start_stop"
+        app:layout_constraintLeft_toRightOf="@+id/btn_start_stop" />
 </android.support.constraint.ConstraintLayout>

@@ -2,7 +2,6 @@ package com.example.agambini.myapplication;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ToggleButton;
 
 //TODO gestire fallimenti
 //TODO loop su diversi settings (frame, sampling)
@@ -37,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
     private Thread mAudioThread;
     private boolean mPlaying;
 
+    private ToggleButton mBtnReverbEnable;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         mPlaying = false;
@@ -44,13 +46,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mBtnReverbEnable = (ToggleButton)findViewById(R.id.btn_reverb_on_off);
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         if (savedInstanceState != null){
             mPermissionToRecordAccepted = savedInstanceState.getBoolean(PERMISSION_TO_RECORD_ACCEPTED_EXTRA);
             mPlaying = !savedInstanceState.getBoolean(PLAYING_EXTRA);
 
-            Button button = (Button)findViewById(R.id.button);
+            Button button = (Button)findViewById(R.id.btn_start_stop);
 
             playButtonClicked(button);
         }
@@ -86,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
             stopPlayback();
             mPlaying = false;
         } else {
-            mPlaying = startPlayback();
+            mPlaying = startPlayback(mBtnReverbEnable.isChecked());
         }
 
         Button button = (Button) view;
@@ -98,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private boolean startPlayback(){
+    private boolean startPlayback(boolean reverbEnable){
         askForRecordAudioPermission();
 
         if (!mPermissionToRecordAccepted){
@@ -116,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
 
         Object audioManager = getSystemService(Context.AUDIO_SERVICE);
 
-        mAudioThread = new Thread(new AudioProcessingRunnable(audioManager));
+        mAudioThread = new Thread(new AudioProcessingRunnable(audioManager, reverbEnable));
 
         mAudioThread.start();
 
