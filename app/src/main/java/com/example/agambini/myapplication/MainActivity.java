@@ -23,6 +23,9 @@ import android.widget.Button;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG  = "MainActivity";
 
+    private static final String PERMISSION_TO_RECORD_ACCEPTED_EXTRA  = "PERMISSION_TO_RECORD_ACCEPTED_EXTRA";
+    private static final String PLAYING_EXTRA  = "PLAYING_EXTRA";
+
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 101;
 
     private static final String[] PERMISSIONS = new String[]{Manifest.permission.RECORD_AUDIO};
@@ -40,6 +43,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        if (savedInstanceState != null){
+            mPermissionToRecordAccepted = savedInstanceState.getBoolean(PERMISSION_TO_RECORD_ACCEPTED_EXTRA);
+            mPlaying = !savedInstanceState.getBoolean(PLAYING_EXTRA);
+
+            Button button = (Button)findViewById(R.id.button);
+
+            playButtonClicked(button);
+        }
     }
 
     @Override
@@ -59,21 +71,28 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putBoolean(PERMISSION_TO_RECORD_ACCEPTED_EXTRA, mPermissionToRecordAccepted);
+        outState.putBoolean(PLAYING_EXTRA, mPlaying);
+    }
+
     public void playButtonClicked(View view){
+        if (mPlaying){
+            stopPlayback();
+            mPlaying = false;
+        } else {
+            mPlaying = startPlayback();
+        }
+
         Button button = (Button) view;
 
-        if (!mPlaying){
-            boolean started = startPlayback();
-
-            if (started){
-                button.setText(R.string.button_stop);
-                mPlaying = true;
-            }
+        if (mPlaying){
+            button.setText(R.string.button_stop);
         } else {
-            stopPlayback();
-
             button.setText(R.string.button_play);
-            mPlaying = false;
         }
     }
 
