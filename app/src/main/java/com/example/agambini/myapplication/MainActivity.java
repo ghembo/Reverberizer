@@ -25,11 +25,11 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 101;
 
-    private static final String[] permissions = new String[]{Manifest.permission.RECORD_AUDIO};
+    private static final String[] PERMISSIONS = new String[]{Manifest.permission.RECORD_AUDIO};
 
-    private boolean permissionToRecordAccepted = false;
+    private boolean mPermissionToRecordAccepted = false;
 
-    private Thread audioThread;
+    private Thread mAudioThread;
     private boolean mPlaying;
 
     @Override
@@ -48,11 +48,11 @@ public class MainActivity extends AppCompatActivity {
 
         switch (requestCode){
             case REQUEST_RECORD_AUDIO_PERMISSION:
-                permissionToRecordAccepted = false;
+                mPermissionToRecordAccepted = false;
 
                 for (int i = 0; i < grantResults.length; i++) {
                     if(permissions[i].equals(Manifest.permission.RECORD_AUDIO)){
-                        permissionToRecordAccepted = grantResults[i] == PackageManager.PERMISSION_GRANTED;
+                        mPermissionToRecordAccepted = grantResults[i] == PackageManager.PERMISSION_GRANTED;
                     }
                 }
                 break;
@@ -63,47 +63,51 @@ public class MainActivity extends AppCompatActivity {
         Button button = (Button) view;
 
         if (!mPlaying){
-            startPlayback();
+            boolean started = startPlayback();
 
-            button.setText(R.string.button_stop);
+            if (started){
+                button.setText(R.string.button_stop);
+                mPlaying = true;
+            }
         } else {
             stopPlayback();
 
             button.setText(R.string.button_play);
+            mPlaying = false;
         }
-
-        mPlaying = !mPlaying;
     }
 
-    private void startPlayback(){
+    private boolean startPlayback(){
         askForRecordAudioPermission();
 
-        if (!permissionToRecordAccepted){
+        if (!mPermissionToRecordAccepted){
             Log.w(TAG, "Permission to record audio denied");
 
             // TODO: show message, if don't accept the app doesn't do anything...
-            return;
+            return false;
         }
 
         Object audioManager = getSystemService(Context.AUDIO_SERVICE);
 
-        audioThread = new Thread(new AudioProcessingRunnable(audioManager));
+        mAudioThread = new Thread(new AudioProcessingRunnable(audioManager));
 
-        audioThread.start();
+        mAudioThread.start();
+
+        return true;
     }
 
     private void stopPlayback(){
-        audioThread.interrupt();
+        mAudioThread.interrupt();
 
-        audioThread = null;
+        mAudioThread = null;
     }
 
     private void askForRecordAudioPermission() {
-        permissionToRecordAccepted =
+        mPermissionToRecordAccepted =
                 ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
 
-        if (!permissionToRecordAccepted){
-            ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+        if (!mPermissionToRecordAccepted){
+            ActivityCompat.requestPermissions(this, PERMISSIONS, REQUEST_RECORD_AUDIO_PERMISSION);
         }
     }
 }

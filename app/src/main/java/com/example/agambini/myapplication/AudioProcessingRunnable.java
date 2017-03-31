@@ -12,33 +12,33 @@ import android.util.Log;
 class AudioProcessingRunnable implements Runnable {
     private static final String TAG  = "AudioProcessingRunnable";
 
-    private int sampleRate;
-    private int bufferSize;
-    private int outputBufferSize;
+    private int mSampleRate;
+    private int mBufferSize;
+    private int mOutputBufferSize;
 
     AudioProcessingRunnable(Object audioManager){
-        sampleRate = 44100;
+        mSampleRate = 44100;
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            sampleRate = android.media.AudioFormat.SAMPLE_RATE_UNSPECIFIED;
+            mSampleRate = android.media.AudioFormat.SAMPLE_RATE_UNSPECIFIED;
         }
 
-        outputBufferSize = 0;
+        mOutputBufferSize = 0;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1){
             AudioManager audioManager2 = (AudioManager) audioManager;
             int rate = Integer.parseInt(audioManager2.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE));
-            outputBufferSize = Integer.parseInt(audioManager2.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER));
+            mOutputBufferSize = Integer.parseInt(audioManager2.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER));
 
             if (rate != 0){
-                sampleRate = rate;
+                mSampleRate = rate;
             }
         }
 
-        bufferSize = AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+        mBufferSize = AudioRecord.getMinBufferSize(mSampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 
-        if (outputBufferSize == 0){
-            outputBufferSize = bufferSize;
+        if (mOutputBufferSize == 0){
+            mOutputBufferSize = mBufferSize;
         }
     }
 
@@ -51,15 +51,15 @@ class AudioProcessingRunnable implements Runnable {
 
         try
         {
-            recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
+            recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, mSampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, mBufferSize);
 
             if (recorder.getState() != AudioRecord.STATE_INITIALIZED){
                 // invalid
             }
 
-            bufferSize = AudioTrack.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
+            mBufferSize = AudioTrack.getMinBufferSize(mSampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
 
-            track = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize, AudioTrack.MODE_STREAM);
+            track = new AudioTrack(AudioManager.STREAM_MUSIC, mSampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, mBufferSize, AudioTrack.MODE_STREAM);
 
             PresetReverb reverb = new PresetReverb(1, track.getAudioSessionId());
             reverb.setPreset(PresetReverb.PRESET_LARGEHALL);
@@ -68,15 +68,15 @@ class AudioProcessingRunnable implements Runnable {
             track.attachAuxEffect(reverb.getId());
             track.setAuxEffectSendLevel(1.0f);
 
-            short[] buffer = new short[outputBufferSize / 2];
+            short[] buffer = new short[mOutputBufferSize / 2];
 
             recorder.startRecording();
             track.play();
 
             while(!Thread.interrupted())
             {
-                bufferSize = recorder.read(buffer, 0, buffer.length);
-                track.write(buffer, 0, bufferSize);
+                mBufferSize = recorder.read(buffer, 0, buffer.length);
+                track.write(buffer, 0, mBufferSize);
             }
         }
         catch(Throwable ex)
