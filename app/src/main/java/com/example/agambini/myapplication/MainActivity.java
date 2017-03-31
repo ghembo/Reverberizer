@@ -2,11 +2,13 @@ package com.example.agambini.myapplication;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -102,7 +104,13 @@ public class MainActivity extends AppCompatActivity {
         if (!mPermissionToRecordAccepted){
             Log.w(TAG, "Permission to record audio denied");
 
-            // TODO: show message, if don't accept the app doesn't do anything...
+            // TODO: use DialogFragment
+            new AlertDialog.Builder(this).
+                    setTitle(R.string.permission_denied).
+                    setMessage(R.string.app_name + getString(R.string.permission_denied_error)).
+                    setPositiveButton("OK", null).
+                    show();
+
             return false;
         }
 

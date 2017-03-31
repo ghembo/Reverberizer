@@ -1,5 +1,7 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Reverberizer</string>
     <string name="button_play">Play</string>
     <string name="button_stop">Stop</string>
+    <string name="permission_denied">Permission denied</string>
+    <string name="permission_denied_error">requires audio recording. Allow audio recording permission in order to be able to use it.</string>
 </resources>
