@@ -11,12 +11,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 
-//TODO popup su non accettazione permessi
 //TODO gestire fallimenti
 //TODO loop su diversi settings (frame, sampling)
 //TODO abilitare/disabilitare o parametrizzare riverbero da UI
-//TODO unico pulsante start/stop
 //TODO provare riverbero + complesso
 //TODO testare qualità e latenza
 //TODO provare producer/consumer
@@ -31,9 +30,12 @@ public class MainActivity extends AppCompatActivity {
     private boolean permissionToRecordAccepted = false;
 
     private Thread audioThread;
+    private boolean mPlaying;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        mPlaying = false;
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -57,7 +59,23 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void startPlayback(View view){
+    public void playButtonClicked(View view){
+        Button button = (Button) view;
+
+        if (!mPlaying){
+            startPlayback();
+
+            button.setText(R.string.button_stop);
+        } else {
+            stopPlayback();
+
+            button.setText(R.string.button_play);
+        }
+
+        mPlaying = !mPlaying;
+    }
+
+    private void startPlayback(){
         askForRecordAudioPermission();
 
         if (!permissionToRecordAccepted){
@@ -74,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         audioThread.start();
     }
 
-    public void stopPlayback(View view){
+    private void stopPlayback(){
         audioThread.interrupt();
 
         audioThread = null;
