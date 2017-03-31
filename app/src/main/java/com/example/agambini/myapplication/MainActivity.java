@@ -12,6 +12,15 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 
+//TODO popup su non accettazione permessi
+//TODO gestire fallimenti
+//TODO loop su diversi settings (frame, sampling)
+//TODO abilitare/disabilitare o parametrizzare riverbero da UI
+//TODO unico pulsante start/stop
+//TODO provare riverbero + complesso
+//TODO testare qualit� e latenza
+//TODO provare producer/consumer
+
 public class MainActivity extends AppCompatActivity {
     private static final String TAG  = "MainActivity";
 
