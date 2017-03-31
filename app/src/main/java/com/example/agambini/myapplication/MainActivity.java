@@ -18,7 +18,7 @@ import android.view.WindowManager;
 //TODO abilitare/disabilitare o parametrizzare riverbero da UI
 //TODO unico pulsante start/stop
 //TODO provare riverbero + complesso
-//TODO testare qualit� e latenza
+//TODO testare qualità e latenza
 //TODO provare producer/consumer
 
 public class MainActivity extends AppCompatActivity {
@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 101;
 
-    private static String[] permissions = new String[]{Manifest.permission.RECORD_AUDIO};
+    private static final String[] permissions = new String[]{Manifest.permission.RECORD_AUDIO};
 
     private boolean permissionToRecordAccepted = false;
 
